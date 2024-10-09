@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Your Cart</title>
+    <style>
+        /* Basic styling for cart page */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .cart-container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+
+        .cart-item img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .cart-item-details {
+            flex-grow: 1;
+            margin-left: 20px;
+        }
+
+        .cart-item h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .cart-item p {
+            margin: 5px 0;
+        }
+
+        .cart-total {
+            font-size: 22px;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .checkout-btn, .clear-cart-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 16px;
+        }
+
+        .checkout-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .checkout-btn:hover {
+            background-color: #218838;
+        }
+
+        .clear-cart-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .clear-cart-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* Modal styling */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            animation: fadeIn 0.5s;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 40%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.5s;
+        }
+
+        .modal-content h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+
+        .modal-content button {
+            width: 100%;
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .modal-content button:hover {
+            background-color: #0056b3;
+        }
+
+        .close-btn {
+            background-color: #dc3545;
+            margin-top: 10px;
+        }
+
+        .close-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); }
+            to { transform: translateY(0); }
+        }
+
+        /* Responsive for small screens */
+        @media screen and (max-width: 768px) {
+            .modal-content {
+                width: 90%;
+            }
+
+            .cart-container {
+                padding: 10px;
+            }
+
+            .cart-item img {
+                width: 80px;
+                height: 80px;
+            }
+
+            .cart-item-details {
+                margin-left: 10px;
+            }
+
+            .checkout-btn, .clear-cart-btn {
+                padding: 10px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cart-container">
+        <h1>Your Cart</h1>
+        
+        <div th:if="${cartItems.size() == 0}">
+            <p>Your cart is empty.</p>
+        </div>
+
+        <div th:each="item : ${cartItems}" class="cart-item">
+            <div>
+                <img th:src="@{'/products/image/' + ${item.product.id}}" alt="Product Image">
+            </div>
+            <div class="cart-item-details">
+                <h3 th:text="${item.product.name}"></h3>
+                <p>Price: Rs.<span th:text="${item.product.price}"></span></p>
+                <p>Quantity: 
+                    <form th:action="@{/cart/update}" method="post" style="display:inline;">
+                        <input type="number" name="quantity" th:value="${item.quantity}" min="1">
+                        <input type="hidden" name="productId" th:value="${item.product.id}">
+                        <button type="submit">Update</button>
+                    </form>
+                </p>
+            </div>
+            <form th:action="@{/cart/remove}" method="post">
+                <input type="hidden" name="productId" th:value="${item.product.id}">
+                <button type="submit">Remove</button>
+            </form>
+        </div>
+
+        <div class="cart-total">
+            Total: Rs.<span th:text="${totalPrice}"></span>
+        </div>
+
+        <div class="button-container">
+            <!-- Clear Cart Button (left) -->
+            <form th:action="@{/cart/clear}" method="post">
+                <button type="submit" class="clear-cart-btn">Clear Cart</button>
+            </form>
+
+            <!-- Checkout Button (right) -->
+            <button id="checkoutBtn" class="checkout-btn">Checkout</button>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content">
+            <h2>Checkout</h2>
+            <form action="/cart/checkout" method="post">
+                <label for="buyerName">Name:</label>
+                <input type="text" name="buyerName" required>
+                <label for="buyerAddress">Address:</label>
+                <input type="text" name="buyerAddress" required>
+                <label for="buyerMobile">Mobile Number:</label>
+                <input type="text" name="buyerMobile" required>
+                <!-- Hidden input to pass product image URL -->
+                <div th:each="item : ${cartItems}">
+                    <input type="hidden" name="productImage" th:value="@{'/products/image/' + ${item.product.id}}">
+                </div>
+                <button type="submit">Proceed to Checkout</button>
+                <button type="button" class="close-btn" id="closeModalBtn">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Get modal elements
+        var modal = document.getElementById("checkoutModal");
+        var checkoutBtn = document.getElementById("checkoutBtn");
+        var closeModalBtn = document.getElementById("closeModalBtn");
+
+        // Show the modal when the checkout button is clicked
+        checkoutBtn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        // Hide the modal when the cancel button is clicked
+        closeModalBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // Hide the modal if the user clicks outside of the modal content
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+
+</body>
+</html>

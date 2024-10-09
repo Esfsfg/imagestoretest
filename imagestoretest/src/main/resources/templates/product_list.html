@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMdU6LgmlU8a3L6ll8x8Y6kx3UEx5AqZX7p25M" crossorigin="anonymous">
+    <style>
+        /* Reset margin and padding */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4; /* Light background */
+        }
+
+        /* Navigation bar styling */
+        .navbar {
+            background-color: white; /* Blue background */
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            font-size: 18px;
+            position: relative; /* Positioning for notification badge */
+        }
+
+        .navbar a:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+            border-radius: 5px;
+        }
+
+        /* Cart icon styling */
+        .cart-icon {
+            position: relative;
+            color: black; /* Change icon color to black */
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -10px;
+            background-color: red; /* Notification badge color */
+            color: white;
+            border-radius: 50%;
+            padding: 3px 6px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 2px solid white; /* White border for contrast */
+            min-width: 20px; /* Minimum width to ensure round shape */
+            height: 20px; /* Fixed height for round shape */
+            display: flex; /* Flexbox for centering */
+            align-items: center; /* Center vertically */
+            justify-content: center; /* Center horizontally */
+        }
+
+        /* Product list styling */
+        h1 {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        /* Product container and card styles */
+        .product-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            justify-items: center;
+            padding: 20px;
+        }
+
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 10px;
+            width: 250px;
+            text-align: center;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: white; /* Card background color */
+            transition: transform 0.3s; /* Smooth transform effect */
+        }
+
+        .product-card:hover {
+            transform: scale(1.05); /* Scale effect on hover */
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .product-card h3 {
+            margin: 10px 0;
+        }
+
+        .product-card p {
+            color: #666;
+        }
+
+        .product-card .price {
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Add to Cart Button */
+        .add-to-cart {
+            margin-top: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s; /* Smooth transition */
+        }
+
+        .add-to-cart:hover {
+            background-color: #218838;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMdU6LgmlU8a3L6ll8x8Y6kx3UEx5AqZX7p25M" crossorigin="anonymous">
+
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <div class="logo">
+            <h1>Your Logo</h1> <!-- Replace with your logo -->
+        </div>
+        <div class="cart-link">
+            <a href="/cart" class="cart-icon">
+                <i class="fa-sharp fa-solid fa-cart-shopping"></i>
+                <span class="cart-count" th:text="${#lists.size(cartItems)}">0</span> <!-- Cart item count -->
+            </a>
+        </div>
+    </div>
+
+    <h1>Product List</h1>
+   
+    <div class="product-container">
+        <div class="product-card" th:each="product : ${products}">
+            <a th:href="@{/products/{id}(id=${product.id})}">
+                <img th:src="@{'/products/image/' + ${product.id}}" alt="Product Image">
+            </a>
+            <h3 th:text="${product.name}"></h3>
+            <p th:text="${product.description}"></p>
+            <div class="price">Rs.<span th:text="${product.price}"></span></div>
+            
+              <!-- Star Rating System -->
+              <div class="stars" th:attr="data-product-id=${product.id}">
+                <span class="star" data-value="1">&#9733;</span>
+                <span class="star" data-value="2">&#9733;</span>
+                <span class="star" data-value="3">&#9733;</span>
+                <span class="star" data-value="4">&#9733;</span>
+                <span class="star" data-value="5">&#9733;</span>
+            </div>
+
+            <!-- Add to Cart Form -->
+            <form th:action="@{/cart/add}" method="post">
+                <input type="hidden" name="productId" th:value="${product.id}">
+                <input type="number" name="quantity" value="1" min="1">
+                <button type="submit" class="add-to-cart">Add to Cart</button>
+            </form>
+        </div>
+    </div>
+    <i class="fa-sharp fa-solid fa-cart-shopping"></i>
+    
+    <script>
+          // Star rating system
+          document.querySelectorAll('.stars').forEach(starContainer => {
+            const stars = starContainer.querySelectorAll('.star');
+            const productId = starContainer.getAttribute('data-product-id');
+    
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = this.getAttribute('data-value');
+                    
+                    stars.forEach(s => {
+                        if (s.getAttribute('data-value') <= rating) {
+                            s.classList.add('active');
+                        } else {
+                            s.classList.remove('active');
+                        }
+                    });
+    
+                    fetch('/products/' + productId + '/rate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ rating: parseInt(rating) })
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            alert(' Thanks For Rating !');
+                        } else {
+                            alert('Error submitting rating.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                });
+            });
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Seller Orders</title>
+    <style>
+        /* Basic styling for the page */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        
+        /* Basic styling for table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f4f4f4;
+        }
+        
+        .order-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .order-header {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        img {
+            width: 100px;
+            height: auto;
+            display: block;
+        }
+
+        .total-row {
+            font-weight: bold;
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Incoming Orders</h1>
+
+    <div th:each="order : ${orders}" class="order-container">
+        <div class="order-header">
+            <span>Buyer: <span th:text="${order.buyerName}"></span></span><br>
+            <span>Address: <span th:text="${order.buyerAddress}"></span></span><br>
+            <span>Mobile no.: <span th:text="${order.buyerMobile}"></span></span><br>
+            <span>Date & Time: <span th:text="${#dates.format(order.orderDate, 'dd/MM/yyyy HH:mm:ss')}"></span></span>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Product Image</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="item : ${order.items}">
+                    <td th:text="${item.product.name}"></td>
+                    <td>
+                        <img th:src="@{'/products/image/' + ${item.product.id}}" alt="Product Image">
+                    </td>
+                    <td th:text="${item.quantity}"></td>
+                    <td th:text="${item.product.price}"></td>
+                    <td th:text="${item.product.price * item.quantity}"></td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="4" style="text-align: right;">Order Total:</td>
+                    <td th:text="${order.totalPrice}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
